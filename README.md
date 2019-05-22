@@ -1,4 +1,4 @@
-# LoRaLib [![Build Status](https://travis-ci.org/zhgzhg/LoRaLib.svg?branch=master)](https://travis-ci.org/zhgzhg/LoRaLib)
+# LoRaLib [![Build Status](https://travis-ci.com/zhgzhg/LoRaLib.svg?branch=master)](https://travis-ci.com/zhgzhg/LoRaLib)
 
 ## Arduino library for LoRa modules based on LoRa chips by Semtech (SX1272, SX1276, SX1278) and HopeRF (RFM95, RFM96, RFM98)
 
