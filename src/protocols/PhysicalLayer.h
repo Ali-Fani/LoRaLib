@@ -188,6 +188,11 @@ class PhysicalLayer {
     */
     uint8_t getDivExponent();
 
+  protected:
+    #ifdef LINUX
+      uint8_t* lastlyAllocatedReadData{nullptr};
+    #endif
+
   private:
     float _crystalFreq;
     uint8_t _divExponent;

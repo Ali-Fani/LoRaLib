@@ -28,7 +28,12 @@ int16_t PhysicalLayer::readData(String& str, size_t len) {
 
   // if packet was received successfully, copy data into String
   if(state == ERR_NONE) {
-    str = String(data);
+    #ifndef LINUX
+      str = String(data);
+    #else
+      str = String((char*) lastlyAllocatedReadData);
+      delete[] lastlyAllocatedReadData;
+    #endif
   }
 
   delete[] data;
@@ -42,7 +47,12 @@ int16_t PhysicalLayer::receive(String& str, size_t len) {
 
   // if packet was received successfully, copy data into String
   if(state == ERR_NONE) {
-    str = String(data);
+    #ifndef LINUX
+      str = String(data);
+    #else
+      str = String((char*) lastlyAllocatedReadData);
+      delete[] lastlyAllocatedReadData;
+    #endif
   }
 
   delete[] data;

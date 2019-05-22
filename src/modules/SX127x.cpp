@@ -499,8 +499,15 @@ int16_t SX127x::readData(uint8_t* data, size_t len) {
   if(len == 0) {
     // argument len equal to zero indicates String call, which means dynamically allocated data array
     // dispose of the original and create a new one
-    delete[] data;
+    #ifndef LINUX
+      delete[] data;
+    #endif
+
     data = new uint8_t[length + 1];
+
+    #ifdef LINUX
+      lastlyAllocatedReadData = data;
+    #endif
   }
   _mod->SPIreadRegisterBurst(SX127X_REG_FIFO, length, data);
 

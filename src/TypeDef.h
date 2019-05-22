@@ -1,17 +1,51 @@
 #ifndef _LORALIB_TYPES_H
 #define _LORALIB_TYPES_H
 
-#if ARDUINO >= 100
-  #include "Arduino.h"
-#else
-  #include "WProgram.h"
+#ifdef ARDUINO
+	if ARDUINO >= 100
+	 #include "Arduino.h"
+	else
+	 #include "WProgram.h"
+	endif
+#endif
+
+#ifdef LINUX
+	#include <inttypes.h>
+	#include <stdint.h>
+	#include <stddef.h>
+	#include <cstring>
+	#include <cmath>
+
+	#include <string>
+	#define String std::string
+
+	#define CHANGE 1
+	#define FALLING 2
+	#define RISING 3
+
+	void attachInterrupt(uint8_t interruptNum, void (*userFunc)(void), int mode);
+	void detachInterrupt(uint8_t interruptNum);
+
+
+	#ifndef DUMMY_ARDUINO_FUNCS
+		#define DUMMY_ARDUINO_FUNCS
+		#define digitalPinToInterrupt(p) {}
+		#define max std::max
+		#define ceil std::ceil
+	#endif
+
 #endif
 
 //#define RADIOLIB_DEBUG
 
 #ifdef RADIOLIB_DEBUG
-  #define DEBUG_PRINT(...) { Serial.print(__VA_ARGS__); }
-  #define DEBUG_PRINTLN(...) { Serial.println(__VA_ARGS__); }
+  #ifndef LINUX
+    #define DEBUG_PRINT(...) { Serial.print(__VA_ARGS__); }
+    #define DEBUG_PRINTLN(...) { Serial.println(__VA_ARGS__); }
+  #else
+    #define DEBUG_PRINT(...) { printf("not implemented macro DEBUG_PRINT"); }
+    #define DEBUG_PRINTLN(...) { printf("not implemented macro DEBUG_PRINTLN\n"); }
+  #endif
 #else
   #define DEBUG_PRINT(...) {}
   #define DEBUG_PRINTLN(...) {}
