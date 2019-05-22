@@ -58,11 +58,11 @@ script:
     fi
     
 # deploy Doxygen docs on master branch and only when building for Arduino UNO
-deploy:
-  provider: pages
-  skip_cleanup: true
-  local_dir: docs/html
-  github_token: $GH_REPO_TOKEN
-  on:
-    branch: master
-    condition: $BOARD = "arduino:avr:uno"
+#deploy:
+#  provider: pages
+#  skip_cleanup: true
+#  local_dir: docs/html
+#  github_token: $GH_REPO_TOKEN
+#  on:
+#    branch: master
+#    condition: $BOARD = "arduino:avr:uno"
