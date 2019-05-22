@@ -11,6 +11,8 @@
  * published by the Free Software Foundation.
  */
 
+#ifdef LINUX
+
 #include "SPI.h"
 
 SPIClass SPI;
@@ -54,3 +56,5 @@ void SPIClass::end() {
   //  
   //}
 }
+
+#endif
