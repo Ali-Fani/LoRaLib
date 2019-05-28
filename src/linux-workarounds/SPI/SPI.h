@@ -45,10 +45,7 @@ public:
   }
 
   inline uint8_t prepareByte(uint8_t b) {
-    if (isLSBmode) {
-      return bitReverseTable256[b & 0xff];
-    }
-    return b;
+    return (!isLSBmode ? b : bitReverseTable256[b]);
   }
 
 private:
