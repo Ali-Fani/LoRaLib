@@ -16,6 +16,16 @@
   #define wiringPiSetup(...) {}
   #define wiringPiSPISetupMode(...) (-1)
   #define wiringPiSPIDataRW(...) (-1)
+  #define digitalWrite(...) (0)
+  #define digitalRead(...) (0)
+  #define pinMode(...) {}
+  #define millis(...) (0)
+  #define micros(...) (0)
+  #define delay(...) (0)
+  #define INPUT
+  #define OUTPUT
+  #define LOW
+  #define HIGH
 #endif
 
 
@@ -40,31 +50,30 @@
 #define SPI_MODE3 3
 
 class SPISettings {
+  int speed;
+  int mode;
+  bool isLSBmode;
+  int channel;
+
+  static const uint8_t bitReverseTable256[256];
+
+  friend class SPIClass;
+
 public:
   SPISettings(uint32_t clock, uint8_t bitOrder, uint8_t dataMode, int spiChannel) : //nonstandard, but full ctor
-      speed(clock), mode(dataMode), isLSBmode(bitOrder == LSB_FIRST), channel(spiChannel) {
+      speed(clock), mode(dataMode), isLSBmode(bitOrder == LSBFIRST), channel(spiChannel) {
   }
 
-  SPISettings(uint32_t clock, uint8_t bitOrder, uint8_t dataMode) : channel(0),
-      speed(clock), mode(dataMode), isLSBmode(bitOrder == LSBFIRST) {
+  SPISettings(uint32_t clock, uint8_t bitOrder, uint8_t dataMode) : speed(clock),
+      isLSBmode(bitOrder == LSBFIRST), mode(dataMode), channel(0) {
   }
 
-  SPISettings() : channel(0), speed(500000), mode(SPI_MODE0), isLSBmode(false) {
+  SPISettings() : speed(500000), mode(SPI_MODE0), isLSBmode(false), channel(0) {
   }
 
   inline uint8_t prepareByte(uint8_t b) {
     return (!isLSBmode ? b : bitReverseTable256[b]);
   }
-
-private:
-  int channel;
-  int speed;
-  int mode;
-  bool isLSBmode;
-
-  static const uint8_t bitReverseTable256[256];
-
-  friend class SPIClass;
 };
 
 
