@@ -17,6 +17,7 @@
 	#include <cmath>
 
 	#include <string>
+	#include <iostream>
 	#define String std::string
 
 	#define CHANGE 1
@@ -32,6 +33,10 @@
 		#define digitalPinToInterrupt(p) {}
 		#define max std::max
 		#define ceil std::ceil
+		#define __FlashStringHelper;
+		#define FPSTR(pstr_pointer) (pstr_pointer)
+		#define PSTR(s) (s)
+		#define F(string_literal) (FPSTR(PSTR(string_literal)))
 	#endif
 
 #endif
@@ -43,8 +48,22 @@
     #define DEBUG_PRINT(...) { Serial.print(__VA_ARGS__); }
     #define DEBUG_PRINTLN(...) { Serial.println(__VA_ARGS__); }
   #else
-    #define DEBUG_PRINT(...) { printf("not implemented macro DEBUG_PRINT"); }
-    #define DEBUG_PRINTLN(...) { printf("not implemented macro DEBUG_PRINTLN\n"); }
+     void DEBUG_PRINT() { }
+     void DEBUG_PRINTLN() { std::cerr << std::endl; }
+
+     template <typename First, typename... Rest>
+     void DEBUG_PRINT(First&& first, Rest&& rest)
+     {
+         std::cerr << std::forward<First>(first);
+         DEBUG_PRINT(std::forward<Rest>(rest)...);
+     }
+
+     template <typename First, typename... Rest>
+     void DEBUG_PRINTLN(First&& first, Rest&& rest)
+     {
+         std::cerr << std::forward<First>(first);
+         DEBUG_PRINTLN(std::forward<Rest>(rest)...);
+     }
   #endif
 #else
   #define DEBUG_PRINT(...) {}
