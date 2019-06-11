@@ -1,6 +1,10 @@
 dist: xenial
 sudo: false
 
+cache:
+  directories:
+   - downloads
+
 env:
   global:
     # keep Arduino IDE version at 1.8.1 until https://github.com/per1234/arduino-ci-script/issues/1 is resolved
@@ -16,9 +20,14 @@ env:
 before_install:
   # install Arduino IDE
   - if [ $BOARD != "NONE:LINUX" ]; then
-      wget http://downloads.arduino.cc/arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz ;
+      mkdir -p downloads ;
+      cd downloads ;
+      if [ ! -f "arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz" ]; then
+        wget http://downloads.arduino.cc/arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz ;
+      fi;
       tar xf arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz ;
       mv arduino-$ARDUINO_IDE_VERSION $HOME/arduino-ide ;
+      cd ..;
       export PATH=$PATH:$HOME/arduino-ide ;
       arduino --pref "boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json,https://dl.espressif.com/dl/package_esp32_index.json" --save-prefs 2>&1 ;
       if [[ "$BOARD" =~ "esp8266:esp8266:" ]]; then
@@ -68,7 +77,7 @@ script:
       cd ..;
       echo -e '#include <LoRaLib.h>' >output.cpp ;
       echo -e "static SX1278 *lora;\nint main(int argc, char **argv) { return 0; }" >>output.cpp ;
-      echo -e "CC = g++5\n" >Makefile ;
+      echo -e "CC = g++\n" >Makefile ;
       echo -e "CFLAGS = -std=c++14 -Wall -DLINUX -Isrc/ -Isrc/modules/ -Isrc/linux-workarounds/SPI/" >>Makefile ;
       echo -ne 'SRC = $(wildcard src/linux-workarounds/SPI/*.cpp) $(wildcard src/linux-workarounds/*.cpp) ' >>Makefile ;
       echo -ne '$(wildcard src/protocols/*.cpp) $(wildcard src/modules/*.cpp) ' >>Makefile ;
