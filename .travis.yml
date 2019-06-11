@@ -41,8 +41,8 @@ script:
   # build all example sketches
   - cd examples
   - for d in */ ; do
-      if [ $BOARD != "NONE:LINUX" ]; then
-        continue ;
+      if [ $BOARD = "NONE:LINUX" ]; then
+        continue;
       fi
       echo -e "\n\033[1;33mBuilding ${d%/} ... \033[0m";
       arduino --verify --board $BOARD $PWD/${d%/}/${d%/}.ino;
