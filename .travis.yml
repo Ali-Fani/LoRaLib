@@ -78,7 +78,7 @@ script:
       echo -e '#include <LoRaLib.h>' >output.cpp ;
       echo -e "static SX1278 *lora;\nint main(int argc, char **argv) { return 0; }" >>output.cpp ;
       echo -e "CC = g++\n" >Makefile ;
-      echo -e "CFLAGS = -std=c++14 -Wall -DLINUX -Isrc/ -Isrc/modules/ -Isrc/linux-workarounds/SPI/" >>Makefile ;
+      echo -e "CFLAGS = -std=c++14 -Wall -DLINUX -DNOWIRINGIPI -Isrc/ -Isrc/modules/ -Isrc/linux-workarounds/SPI/" >>Makefile ;
       echo -ne 'SRC = $(wildcard src/linux-workarounds/SPI/*.cpp) $(wildcard src/linux-workarounds/*.cpp) ' >>Makefile ;
       echo -ne '$(wildcard src/protocols/*.cpp) $(wildcard src/modules/*.cpp) ' >>Makefile ;
       echo -ne '$(wildcard src/*.cpp) output.cpp' >>Makefile ;

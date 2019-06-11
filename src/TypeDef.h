@@ -45,7 +45,7 @@
 		#define pgm_read_byte(addr)                                    \
   (__extension__({                                                     \
     PGM_P __local = (PGM_P)(addr);  /* isolate varible for macro expansion */\
-    ptrdiff_t __offset = ((uint32_t)__local & 0x00000003); /* byte aligned mask */            \
+    ptrdiff_t __offset = (reinterpret_cast<uint32_t>(__local) & 0x00000003); /* byte aligned mask */\
     const uint32_t* __addr32 = (const uint32_t*)((const uint8_t*)(__local)-__offset); \
     uint8_t __result = ((*__addr32) >> (__offset * 8));                        \
     __result;                                                                  \

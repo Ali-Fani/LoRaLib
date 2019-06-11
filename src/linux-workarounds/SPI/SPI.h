@@ -9,8 +9,14 @@
 #include <cstdio>
 #include <cstring>
 
-#include <wiringPi.h>
-#include <wiringPiSPI.h>
+#ifndef NOWIRINGIPI
+  #include <wiringPi.h>
+  #include <wiringPiSPI.h>
+#else
+  #define wiringPiSetup(...) {}
+  #define wiringPiSPISetupMode(...) (-1)
+  #define wiringPiSPIDataRW(...) (-1)
+#endif
 
 
 // SPI_HAS_TRANSACTION means SPI has beginTransaction(), endTransaction(),
