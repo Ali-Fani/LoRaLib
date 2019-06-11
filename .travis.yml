@@ -1,13 +1,10 @@
+dist: xenial
 sudo: false
 
 env:
   global:
     # keep Arduino IDE version at 1.8.1 until https://github.com/per1234/arduino-ci-script/issues/1 is resolved
     - ARDUINO_IDE_VERSION="1.8.1"
-  addons:
-    apt:
-      packages:
-        - g++-5
   matrix:
     - BOARD="arduino:avr:uno"
     - BOARD="arduino:avr:leonardo"
