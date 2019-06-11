@@ -10,7 +10,7 @@
 #include <cstring>
 
 #include <wiringPi.h>
-#include <wiringPiSPI.h> 
+#include <wiringPiSPI.h>
 
 
 // SPI_HAS_TRANSACTION means SPI has beginTransaction(), endTransaction(),
@@ -35,10 +35,12 @@
 
 class SPISettings {
 public:
-  SPISettings(int spiChannel, int spiSpeed, int dataMode) : channel(spiChannel), speed(spiSpeed), mode(dataMode), isLSBmode(false) {
+  SPISettings(uint32_t clock, uint8_t bitOrder, uint8_t dataMode, int spiChannel) : //nonstandard, but full ctor
+      speed(clock), mode(dataMode), isLSBmode(bitOrder == LSB_FIRST), channel(spiChannel) {
   }
 
-  SPISettings(uint32_t clock, uint8_t bitOrder, uint8_t dataMode) : channel(0), speed(clock), mode(dataMode), isLSBmode(bitOrder == LSBFIRST) {
+  SPISettings(uint32_t clock, uint8_t bitOrder, uint8_t dataMode) : channel(0),
+      speed(clock), mode(dataMode), isLSBmode(bitOrder == LSBFIRST) {
   }
 
   SPISettings() : channel(0), speed(500000), mode(SPI_MODE0), isLSBmode(false) {
@@ -77,12 +79,12 @@ public:
   // this function is used to gain exclusive access to the SPI bus
   // and configure the correct settings.
   inline static void beginTransaction(SPISettings settings) {
-        SPIClass::settings = settings;
-	SPIClass::spiDeviceFp = wiringPiSPISetupMode(settings.channel, settings.speed, settings.mode);
+    SPIClass::settings = settings;
+    SPIClass::spiDeviceFp = wiringPiSPISetupMode(settings.channel, settings.speed, settings.mode);
   }
 
   // Write to the SPI bus (MOSI pin) and also receive (MISO pin)
-  inline static uint8_t transfer(uint8_t data) { 
+  inline static uint8_t transfer(uint8_t data) {
     data = settings.prepareByte(data);
     if (wiringPiSPIDataRW(settings.channel, (unsigned char*)&data, 1) == -1) {
        int err = errno;
@@ -90,15 +92,15 @@ public:
     }
     return data;
   }
-  
+
   inline static void transfer(void *buf, size_t count) {
     unsigned char* dataBuf = new unsigned char[count];
     memcpy(dataBuf, buf, count);
-    
+
     for (size_t i = 0; i < count; ++i) {
-      dataBuf[i] = settings.prepareByte(dataBuf[i]); 
+      dataBuf[i] = settings.prepareByte(dataBuf[i]);
     }
- 
+
     if (wiringPiSPIDataRW(settings.channel, dataBuf, count) == -1) {
       int err = errno;
       printf("error writing/reading to SPI: %d\n", err);
