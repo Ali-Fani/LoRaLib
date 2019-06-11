@@ -51,9 +51,9 @@ int16_t SX1278::begin(float freq, float bw, uint8_t sf, uint8_t cr, uint8_t sync
   return(state);
 }
 
-int16_t SX1278::beginFSK(float freq, float br, float freqDev, float rxBw, int8_t power, uint8_t currentLimit, bool enableOOK) {
+int16_t SX1278::beginFSK(float freq, float br, float freqDev, float rxBw, int8_t power, uint8_t currentLimit, uint16_t preambleLength, bool enableOOK) {
   // execute common part
-  int16_t state = SX127x::beginFSK(SX1278_CHIP_VERSION, br, freqDev, rxBw, currentLimit, enableOOK);
+  int16_t state = SX127x::beginFSK(SX1278_CHIP_VERSION, br, freqDev, rxBw, currentLimit, preambleLength, enableOOK);
   if(state != ERR_NONE) {
     return(state);
   }
@@ -192,6 +192,17 @@ int16_t SX1278::setBandwidth(float bw) {
   int16_t state = SX1278::setBandwidthRaw(newBandwidth);
   if(state == ERR_NONE) {
     SX127x::_bw = bw;
+
+    // calculate symbol length and set low data rate optimization, if needed
+    float symbolLength = (float)(uint32_t(1) << SX127x::_sf) / (float)SX127x::_bw;
+    DEBUG_PRINT("Symbol length: ");
+    DEBUG_PRINT(symbolLength);
+    DEBUG_PRINTLN(" ms");
+    if(symbolLength >= 16.0) {
+      state = _mod->SPIsetRegValue(SX1278_REG_MODEM_CONFIG_3, SX1278_LOW_DATA_RATE_OPT_ON, 3, 3);
+    } else {
+      state = _mod->SPIsetRegValue(SX1278_REG_MODEM_CONFIG_3, SX1278_LOW_DATA_RATE_OPT_OFF, 3, 3);
+    }
   }
   return(state);
 }
@@ -235,6 +246,17 @@ int16_t SX1278::setSpreadingFactor(uint8_t sf) {
   int16_t state = SX1278::setSpreadingFactorRaw(newSpreadingFactor);
   if(state == ERR_NONE) {
     SX127x::_sf = sf;
+
+    // calculate symbol length and set low data rate optimization, if needed
+    float symbolLength = (float)(uint32_t(1) << SX127x::_sf) / (float)SX127x::_bw;
+    DEBUG_PRINT("Symbol length: ");
+    DEBUG_PRINT(symbolLength);
+    DEBUG_PRINTLN(" ms");
+    if(symbolLength >= 16.0) {
+      state = _mod->SPIsetRegValue(SX1278_REG_MODEM_CONFIG_3, SX1278_LOW_DATA_RATE_OPT_ON, 3, 3);
+    } else {
+      state = _mod->SPIsetRegValue(SX1278_REG_MODEM_CONFIG_3, SX1278_LOW_DATA_RATE_OPT_OFF, 3, 3);
+    }
   }
   return(state);
 }
@@ -342,13 +364,14 @@ int16_t SX1278::setDataShaping(float sh) {
   int16_t state = SX127x::standby();
 
   // set data shaping
+  sh *= 10.0;
   if(abs(sh - 0.0) <= 0.001) {
     state |= _mod->SPIsetRegValue(SX127X_REG_PA_RAMP, SX1278_NO_SHAPING, 6, 5);
-  } else if(abs(sh - 0.3) <= 0.001) {
+  } else if(abs(sh - 3.0) <= 0.001) {
     state |= _mod->SPIsetRegValue(SX127X_REG_PA_RAMP, SX1278_FSK_GAUSSIAN_0_3, 6, 5);
-  } else if(abs(sh - 0.5) <= 0.001) {
+  } else if(abs(sh - 5.0) <= 0.001) {
     state |= _mod->SPIsetRegValue(SX127X_REG_PA_RAMP, SX1278_FSK_GAUSSIAN_0_5, 6, 5);
-  } else if(abs(sh - 1.0) <= 0.001) {
+  } else if(abs(sh - 10.0) <= 0.001) {
     state |= _mod->SPIsetRegValue(SX127X_REG_PA_RAMP, SX1278_FSK_GAUSSIAN_1_0, 6, 5);
   } else {
     return(ERR_INVALID_DATA_SHAPING);
@@ -465,24 +488,6 @@ int16_t SX1278::setCodingRateRaw(uint8_t newCodingRate) {
 
   // write register
   state |= _mod->SPIsetRegValue(SX127X_REG_MODEM_CONFIG_1, newCodingRate, 3, 1);
-  return(state);
-}
-
-int16_t SX1278::config() {
-  // configure common registers
-  int16_t state = SX127x::config();
-  if(state != ERR_NONE) {
-    return(state);
-  }
-
-  // calculate symbol length and set low data rate optimization, if needed
-  uint16_t base = 1;
-  float symbolLength = (float)(base << _sf) / (float)_bw;
-  if(symbolLength >= 16.0) {
-    state = _mod->SPIsetRegValue(SX1278_REG_MODEM_CONFIG_3, SX1278_LOW_DATA_RATE_OPT_ON, 0, 0);
-  } else {
-    state = _mod->SPIsetRegValue(SX1278_REG_MODEM_CONFIG_3, SX1278_LOW_DATA_RATE_OPT_OFF, 0, 0);
-  }
   return(state);
 }
 
