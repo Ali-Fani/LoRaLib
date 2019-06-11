@@ -61,7 +61,8 @@ script:
       doxygen Doxyfile;
     fi
   # test compulation under Linux
-  - if [ $BOARD = "NONE:LINUX" ]; then
+  - >
+    if [ $BOARD = "NONE:LINUX" ]; then
       cd ..;
       echo -e '#include <LoRaLib.h>' >output.cpp ;
       echo -e "static SX1278 *lora;\nint main(int argc, char **argv) { return 0; }" >>output.cpp ;
