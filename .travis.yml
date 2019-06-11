@@ -15,7 +15,7 @@ env:
 
 before_install:
   # install Arduino IDE
-  - if [ $BOARD != "NONE:LINUX"]; then
+  - if [ $BOARD != "NONE:LINUX" ]; then
       wget http://downloads.arduino.cc/arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz ;
       tar xf arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz ;
       mv arduino-$ARDUINO_IDE_VERSION $HOME/arduino-ide ;
