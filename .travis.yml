@@ -42,7 +42,8 @@ script:
   - cd examples
   - for d in */ ; do
       if [ $BOARD = "NONE:LINUX" ]; then
-        continue;
+        echo -e "\033[1;36m${d%/} build SKIPPED\033[0m\n";
+        continue
       fi
       echo -e "\n\033[1;33mBuilding ${d%/} ... \033[0m";
       arduino --verify --board $BOARD $PWD/${d%/}/${d%/}.ino;
