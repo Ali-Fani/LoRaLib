@@ -60,15 +60,28 @@ class SPISettings {
   friend class SPIClass;
 
 public:
-  SPISettings(uint32_t clock, uint8_t bitOrder, uint8_t dataMode, int spiChannel) : //nonstandard, but full ctor
-      speed(clock), mode(dataMode), isLSBmode(bitOrder == LSBFIRST), channel(spiChannel) {
+  SPISettings(uint32_t clock, uint8_t bitOrder, uint8_t dataMode, int spiChannel) //nonstandard, but full ctor
+  {
+    speed = clock;
+    isLSBmode = (bitOrder == LSBFIRST);
+    mode = dataMode;
+    channel = spiChannel;
   }
 
-  SPISettings(uint32_t clock, uint8_t bitOrder, uint8_t dataMode) : speed(clock),
-      isLSBmode(bitOrder == LSBFIRST), mode(dataMode), channel(0) {
+  SPISettings(uint32_t clock, uint8_t bitOrder, uint8_t dataMode)
+  {
+    speed = clock;
+    isLSBmode = (bitOrder == LSBFIRST);
+    mode = dataMode;
+    channel = 0;
   }
 
-  SPISettings() : speed(500000), mode(SPI_MODE0), isLSBmode(false), channel(0) {
+  SPISettings()
+  {
+    speed = 500000;
+    mode = SPI_MODE0;
+    isLSBmode = false;
+    channel = 0;
   }
 
   inline uint8_t prepareByte(uint8_t b) {
