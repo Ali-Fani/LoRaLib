@@ -10,6 +10,7 @@ env:
     - BOARD="arduino:avr:mega:cpu=atmega2560"
     - BOARD="esp8266:esp8266:generic:xtal=80,ResetMethod=ck,CrystalFreq=26,FlashFreq=40,FlashMode=qio,eesz=512K"
     - BOARD="esp32:esp32:esp32"
+    - BOARD="NONE:LINUX"
 
 before_install:
   # install Arduino IDE
@@ -17,7 +18,7 @@ before_install:
   - tar xf arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz
   - mv arduino-$ARDUINO_IDE_VERSION $HOME/arduino-ide
   - export PATH=$PATH:$HOME/arduino-ide
-  
+
   # install 3rd party boards
   - arduino --pref "boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json,https://dl.espressif.com/dl/package_esp32_index.json" --save-prefs 2>&1
   - if [[ "$BOARD" =~ "esp8266:esp8266:" ]]; then
@@ -56,7 +57,22 @@ script:
       cd ..;
       doxygen Doxyfile;
     fi
-    
+  # test compulation under Linux
+  - if [ $BOARD = "NONE:LINUX" ]; then
+      echo -e '#include <LoRaLib.h>' >output.cpp ;
+      echo -e "static SX1278 *lora;\nint main(int argc, char **argv) { return 0; }" >>output.cpp ;
+      echo -e "CC = g++\n" >Makefile ;
+      echo -e "CFLAGS = -std=c++14 -Wall -DLINUX -ILoRaLib/src/ -ILoRaLib/src/modules/ -ILoRaLib/src/linux-workarounds/SPI/" >>Makefile ;
+      echo -ne 'SRC = $(wildcard LoRaLib/src/linux-workarounds/SPI/*.cpp) $(wildcard LoRaLib/src/linux-workarounds/*.cpp) ' >>Makefile ;
+      echo -ne '$(wildcard LoRaLib/src/protocols/*.cpp) $(wildcard LoRaLib/src/modules/*.cpp) ' >>Makefile ;
+      echo -ne '$(wildcard LoRaLib/src/*.cpp) output.cpp' >>Makefile ;
+      echo -e "\n\t" >>Makefile ;
+      echo -e 'all: $(SRC)' >>Makefile ;
+      echo -ne "\t" >>Makefile ;
+      echo -ne '$(CC) -o output $^ $(CFLAGS)' >>Makefile ;
+      make
+    fi
+
 # deploy Doxygen docs on master branch and only when building for Arduino UNO
 #deploy:
 #  provider: pages
