@@ -41,6 +41,9 @@ script:
   # build all example sketches
   - cd examples
   - for d in */ ; do
+      if [ $BOARD != "NONE:LINUX" ]; then
+        continue ;
+      fi
       echo -e "\n\033[1;33mBuilding ${d%/} ... \033[0m";
       arduino --verify --board $BOARD $PWD/${d%/}/${d%/}.ino;
       if [ $? -ne 0 ]; then
@@ -59,18 +62,19 @@ script:
     fi
   # test compulation under Linux
   - if [ $BOARD = "NONE:LINUX" ]; then
+      cd ..;
       echo -e '#include <LoRaLib.h>' >output.cpp ;
       echo -e "static SX1278 *lora;\nint main(int argc, char **argv) { return 0; }" >>output.cpp ;
       echo -e "CC = g++\n" >Makefile ;
-      echo -e "CFLAGS = -std=c++14 -Wall -DLINUX -ILoRaLib/src/ -ILoRaLib/src/modules/ -ILoRaLib/src/linux-workarounds/SPI/" >>Makefile ;
-      echo -ne 'SRC = $(wildcard LoRaLib/src/linux-workarounds/SPI/*.cpp) $(wildcard LoRaLib/src/linux-workarounds/*.cpp) ' >>Makefile ;
-      echo -ne '$(wildcard LoRaLib/src/protocols/*.cpp) $(wildcard LoRaLib/src/modules/*.cpp) ' >>Makefile ;
-      echo -ne '$(wildcard LoRaLib/src/*.cpp) output.cpp' >>Makefile ;
+      echo -e "CFLAGS = -std=c++14 -Wall -DLINUX -Isrc/ -Isrc/modules/ -Isrc/linux-workarounds/SPI/" >>Makefile ;
+      echo -ne 'SRC = $(wildcard src/linux-workarounds/SPI/*.cpp) $(wildcard src/linux-workarounds/*.cpp) ' >>Makefile ;
+      echo -ne '$(wildcard src/protocols/*.cpp) $(wildcard src/modules/*.cpp) ' >>Makefile ;
+      echo -ne '$(wildcard src/*.cpp) output.cpp' >>Makefile ;
       echo -e "\n\t" >>Makefile ;
       echo -e 'all: $(SRC)' >>Makefile ;
       echo -ne "\t" >>Makefile ;
       echo -ne '$(CC) -o output $^ $(CFLAGS)' >>Makefile ;
-      make
+      make;
     fi
 
 # deploy Doxygen docs on master branch and only when building for Arduino UNO
