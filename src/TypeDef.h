@@ -33,10 +33,23 @@
 		#define digitalPinToInterrupt(p) {}
 		#define max std::max
 		#define ceil std::ceil
-		#define __FlashStringHelper;
-		#define FPSTR(pstr_pointer) (pstr_pointer)
-		#define PSTR(s) (s)
+
+		class __FlashStringHelper;
+		#define FPSTR(pstr_pointer) (reinterpret_cast<const __FlashStringHelper *>(pstr_pointer))
 		#define F(string_literal) (FPSTR(PSTR(string_literal)))
+		#define ICACHE_RODATA_ATTR
+		#define PROGMEM ICACHE_RODATA_ATTR
+		#define PGM_P const char *
+		#define PGM_VOID_P const void *
+		#define PSTR(s) (__extension__({static const char __c[] PROGMEM = (s); &__c[0];}))
+		#define pgm_read_byte(addr)                                    \
+  (__extension__({                                                     \
+    PGM_P __local = (PGM_P)(addr);  /* isolate varible for macro expansion */\
+    ptrdiff_t __offset = ((uint32_t)__local & 0x00000003); /* byte aligned mask */            \
+    const uint32_t* __addr32 = (const uint32_t*)((const uint8_t*)(__local)-__offset); \
+    uint8_t __result = ((*__addr32) >> (__offset * 8));                        \
+    __result;                                                                  \
+}))
 	#endif
 
 #endif
