@@ -10,12 +10,12 @@ env:
     # keep Arduino IDE version at 1.8.1 until https://github.com/per1234/arduino-ci-script/issues/1 is resolved
     - ARDUINO_IDE_VERSION="1.8.1"
   matrix:
+    - BOARD="NONE:LINUX"
     - BOARD="arduino:avr:uno"
     - BOARD="arduino:avr:leonardo"
     - BOARD="arduino:avr:mega:cpu=atmega2560"
     - BOARD="esp8266:esp8266:generic:xtal=80,ResetMethod=ck,CrystalFreq=26,FlashFreq=40,FlashMode=qio,eesz=512K"
     - BOARD="esp32:esp32:esp32"
-    - BOARD="NONE:LINUX"
 
 before_install:
   # install Arduino IDE
