@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <cstdio>
 #include <cstring>
@@ -97,7 +98,7 @@ class SPIClass {
 
 public:
   SPIClass() {
-    wiringPiSetup(); // USING wiringPi numbers scheme!!!! exec command "gpio readall" to check them
+    SPIClass::spiDeviceFp = wiringPiSetup(); // USING wiringPi numbers scheme!!!! exec command "gpio readall" to check them
   }
 
   // Initialize the SPI library
@@ -107,8 +108,11 @@ public:
   // this function is used to gain exclusive access to the SPI bus
   // and configure the correct settings.
   inline static void beginTransaction(SPISettings settings) {
-    SPIClass::settings = settings;
-    SPIClass::spiDeviceFp = wiringPiSPISetupMode(settings.channel, settings.speed, settings.mode);
+    if (!initialized) {
+      SPIClass::settings = settings;
+      SPIClass::spiDeviceFp = wiringPiSPISetupMode(settings.channel, settings.speed, settings.mode);
+      initialized++;
+    }
   }
 
   // Write to the SPI bus (MOSI pin) and also receive (MISO pin)
@@ -139,6 +143,14 @@ public:
   // After performing a group of transfers and releasing the chip select
   // signal, this function allows others to access the SPI bus
   inline static void endTransaction(void) {
+    if (initialized) {
+      if (--initialized == 0) {
+        if (SPIClass::spiDeviceFp > -1) {
+          close(SPIClass::spiDeviceFp);
+          SPIClass::spiDeviceFp = -1;
+        }
+      }
+    }
   }
 
   // Disable the SPI bus
