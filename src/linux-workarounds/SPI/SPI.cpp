@@ -39,22 +39,18 @@ const uint8_t SPISettings::bitReverseTable256[] =  {
   };
 SPISettings SPIClass::settings;
 
+
 void SPIClass::begin()
 {
-  if (!initialized) {
-    SPIClass::beginTransaction(SPIClass::settings);
-    initialized++; // reference count
-  }
+  SPIClass::spiDeviceFp = wiringPiSPISetupMode(settings.channel, settings.speed, settings.mode); 
 }
 
-void SPIClass::end() {
-  // Decrease the reference counter
-  if (initialized)
-    initialized--;
-  // If there are no more references disable SPI
-  //if (!initialized) {
-  //  
-  //}
+void SPIClass::end()
+{
+  if (SPIClass::spiDeviceFp != -1) {
+    close(SPIClass::spiDeviceFp);
+    SPIClass::spiDeviceFp = -1;
+  }
 }
 
 #endif
