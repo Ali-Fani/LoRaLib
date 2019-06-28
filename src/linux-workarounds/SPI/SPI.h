@@ -108,10 +108,9 @@ public:
   // this function is used to gain exclusive access to the SPI bus
   // and configure the correct settings.
   inline static void beginTransaction(SPISettings settings) {
-    if (!initialized) {
+    if (!initialized++) {
       SPIClass::settings = settings;
       SPIClass::spiDeviceFp = wiringPiSPISetupMode(settings.channel, settings.speed, settings.mode);
-      initialized++;
     }
   }
 
