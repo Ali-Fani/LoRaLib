@@ -119,7 +119,7 @@ public:
     data = settings.prepareByte(data);
     if (wiringPiSPIDataRW(settings.channel, (unsigned char*)&data, 1) == -1) {
        int err = errno;
-       printf("error writing/reading to SPI: %d\n", err);
+       printf("error writing/reading to SPI: %d - %s\n", err, strerror(err));
     }
     return data;
   }
