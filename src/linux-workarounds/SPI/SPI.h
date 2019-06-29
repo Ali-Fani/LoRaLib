@@ -98,7 +98,7 @@ class SPIClass {
 
 public:
   SPIClass() {
-    SPIClass::spiDeviceFp = wiringPiSetup(); // USING wiringPi numbers scheme!!!! exec command "gpio readall" to check them
+    wiringPiSetup(); // USING wiringPi numbers scheme!!!! exec command "gpio readall" to check them
   }
 
   // Initialize the SPI library
@@ -110,7 +110,13 @@ public:
   inline static void beginTransaction(SPISettings settings) {
     if (!initialized++) {
       SPIClass::settings = settings;
+      if (SPIClass::spiDeviceFp != -1) {
+        close(SPIClass::spiDeviceFp);
+      }
       SPIClass::spiDeviceFp = wiringPiSPISetupMode(settings.channel, settings.speed, settings.mode);
+      if (SPIClass::spiDeviceFp == -1) {
+        initialized = 0;
+      }
     }
   }
 
@@ -143,11 +149,12 @@ public:
   // signal, this function allows others to access the SPI bus
   inline static void endTransaction(void) {
     if (initialized) {
-      if (--initialized == 0) {
-        if (SPIClass::spiDeviceFp > -1) {
+      if (--initialized <= 0) {
+        if (SPIClass::spiDeviceFp != -1) {
           close(SPIClass::spiDeviceFp);
           SPIClass::spiDeviceFp = -1;
         }
+        initialized = 0;
       }
     }
   }

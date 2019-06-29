@@ -42,7 +42,9 @@ SPISettings SPIClass::settings;
 
 void SPIClass::begin()
 {
-  SPIClass::spiDeviceFp = wiringPiSPISetupMode(settings.channel, settings.speed, settings.mode); 
+  if (SPIClass::spiDeviceFp != -1) {
+    SPIClass::spiDeviceFp = wiringPiSPISetupMode(settings.channel, settings.speed, settings.mode);
+  }
 }
 
 void SPIClass::end()
