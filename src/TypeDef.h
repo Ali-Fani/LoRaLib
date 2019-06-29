@@ -58,14 +58,14 @@
      void DEBUG_PRINTLN() { std::cerr << std::endl; }
 
      template <typename First, typename... Rest>
-     void DEBUG_PRINT(First&& first, Rest&& rest)
+     void DEBUG_PRINT(First&& first, Rest&&... rest)
      {
          std::cerr << std::forward<First>(first);
          DEBUG_PRINT(std::forward<Rest>(rest)...);
      }
 
      template <typename First, typename... Rest>
-     void DEBUG_PRINTLN(First&& first, Rest&& rest)
+     void DEBUG_PRINTLN(First&& first, Rest&&... rest)
      {
          std::cerr << std::forward<First>(first);
          DEBUG_PRINTLN(std::forward<Rest>(rest)...);
