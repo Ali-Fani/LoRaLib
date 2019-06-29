@@ -18,6 +18,10 @@
 
 	#include <string>
 	#include <iostream>
+	#include <iomanip>
+	#include <limits>
+	#include <locale>
+
 	#define String std::string
 
 	#define CHANGE 1
@@ -43,6 +47,108 @@
 		#define PGM_VOID_P const void *
 		#define PSTR(s) (__extension__({static const char __c[] PROGMEM = (s); &__c[0];}))
 		#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
+
+		typedef std::ios_base& (*mock_manipulator)(std::ios_base&);
+
+		#define HEX std::hex
+		#define DEC std::dec
+		#define OCT std::oct
+
+		template <typename _T>
+		struct _binary { std::string _digits; };
+
+		template <typename T>
+		inline _binary<T> binary(T n) {
+			_binary<T> __binary;
+			int bits = sizeof(n);
+
+			switch (bits) {
+				case 1: bits = 7; break;
+				case 2: bits = 15; break;
+				case 4: bits = 31; break;
+				case 8: bits = 63; break;
+			}
+
+			for (int i = bits; i >= 0; --i) {
+				if ((n >> i) & 1) __binary._digits.append("1");
+				else __binary._digits.append("0");
+			}
+
+			return __binary;
+		}
+
+		template <typename T>
+		inline std::ostream& operator<<(std::ostream& stream, _binary<T> __binary) {
+			stream << __binary._digits;
+			return stream;
+		}
+
+		struct _BIN {};
+
+		class MockDebugSerial {
+		public:
+			operator bool() { return true; }
+
+			template <typename SPD, typename CFG=int>
+			void begin(SPD speed, CFG config={}) { }
+			void end() { }
+
+			void print() { }
+			void println() { std::cerr << std::endl; }
+
+			template <typename NI>
+			void print(NI number, mock_manipulator mm) {
+				static_assert(std::is_integral<NI>::value, "Integral required.");
+				std::cerr << mm << number;
+			}
+			template <typename NI>
+			void println(NI number, mock_manipulator mm) {
+				static_assert(std::is_integral<NI>::value, "Integral required.");
+				print(number, mm);
+				println();
+			}
+
+			template <typename NI>
+			void print(NI number, struct _BIN mm) {
+				static_assert(std::is_integral<NI>::value, "Integral required.");
+				std::cerr << binary(number);
+			}
+			template <typename NI>
+			void println(NI number, struct _BIN mm) {
+				static_assert(std::is_integral<NI>::value, "Integral required.");
+				print(number, mm);
+				println();
+			}
+
+			template <typename ND>
+			void print(ND number, int precision) {
+				static_assert(std::is_floating_point<ND>::value, "Floating-point required.");
+				std::cerr << std::setprecision(precision) << number;
+			}
+
+			template <typename ND>
+			void println(ND number, int precision) {
+				static_assert(std::is_floating_point<ND>::value, "Floating-point required.");
+				print(number, precision);
+				println();
+			}
+
+			template <typename First, typename... Rest>
+			void print(First&& first, Rest&&... rest) {
+				std::cerr << std::forward<First>(first);
+				print(std::forward<Rest>(rest)...);
+			}
+
+			template <typename First, typename... Rest>
+			void println(First&& first, Rest&&... rest) {
+				std::cerr << std::forward<First>(first);
+				println(std::forward<Rest>(rest)...);
+			}
+
+		};
+		extern _BIN BIN;
+		extern MockDebugSerial Serial;
+
 	#endif
 
 #endif
@@ -50,27 +156,8 @@
 //#define RADIOLIB_DEBUG
 
 #ifdef RADIOLIB_DEBUG
-  #ifndef LINUX
-    #define DEBUG_PRINT(...) { Serial.print(__VA_ARGS__); }
-    #define DEBUG_PRINTLN(...) { Serial.println(__VA_ARGS__); }
-  #else
-     void DEBUG_PRINT() { }
-     void DEBUG_PRINTLN() { std::cerr << std::endl; }
-
-     template <typename First, typename... Rest>
-     void DEBUG_PRINT(First&& first, Rest&&... rest)
-     {
-         std::cerr << std::forward<First>(first);
-         DEBUG_PRINT(std::forward<Rest>(rest)...);
-     }
-
-     template <typename First, typename... Rest>
-     void DEBUG_PRINTLN(First&& first, Rest&&... rest)
-     {
-         std::cerr << std::forward<First>(first);
-         DEBUG_PRINTLN(std::forward<Rest>(rest)...);
-     }
-  #endif
+  #define DEBUG_PRINT(...) { Serial.print(__VA_ARGS__); }
+  #define DEBUG_PRINTLN(...) { Serial.println(__VA_ARGS__); }
 #else
   #define DEBUG_PRINT(...) {}
   #define DEBUG_PRINTLN(...) {}
@@ -240,3 +327,4 @@
 */
 
 #endif
+

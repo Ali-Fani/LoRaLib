@@ -9,4 +9,8 @@
 	void detachInterrupt(uint8_t interruptNum) {
 	  printf("not implemented %s\n", __func__);
 	}
+
+	_BIN BIN;
+	MockDebugSerial Serial;
+
 #endif
