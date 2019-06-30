@@ -41,6 +41,7 @@
 		class __FlashStringHelper;
 		#define FPSTR(pstr_pointer) (reinterpret_cast<const __FlashStringHelper *>(pstr_pointer))
 		#define F(string_literal) (FPSTR(PSTR(string_literal)))
+		//#define F(string_literal) (string_literal)
 		#define ICACHE_RODATA_ATTR
 		#define PROGMEM ICACHE_RODATA_ATTR
 		#define PGM_P const char *
@@ -53,6 +54,11 @@
 		#define HEX std::hex
 		#define DEC std::dec
 		#define OCT std::oct
+
+		#define is_char_type(T) ( std::is_same<T, char>::value || \
+			std::is_same<T, unsigned char>::value || std::is_same<T, uint8_t>::value || \
+			std::is_same<T, int8_t>::value || std::is_same<T, wchar_t>::value || \
+			std::is_same<T, char16_t>::value || std::is_same<T, char32_t>::value )
 
 		template <typename _T>
 		struct _binary { std::string _digits; };
@@ -99,7 +105,8 @@
 			template <typename NI>
 			void print(NI number, mock_manipulator mm) {
 				static_assert(std::is_integral<NI>::value, "Integral required.");
-				std::cerr << mm << number;
+				typename std::conditional<is_char_type(NI), unsigned long, NI>::type _number = number;
+				std::cerr << mm << _number;
 			}
 			template <typename NI>
 			void println(NI number, mock_manipulator mm) {
@@ -135,13 +142,21 @@
 
 			template <typename First, typename... Rest>
 			void print(First&& first, Rest&&... rest) {
-				std::cerr << std::forward<First>(first);
+				using MYTYPE = typename std::conditional< \
+					std::is_same<const __FlashStringHelper*, First>::value, const char*, First>::type;
+				MYTYPE _first = reinterpret_cast<MYTYPE>(first);
+
+				std::cerr << std::forward<MYTYPE>(_first);
 				print(std::forward<Rest>(rest)...);
 			}
 
 			template <typename First, typename... Rest>
 			void println(First&& first, Rest&&... rest) {
-				std::cerr << std::forward<First>(first);
+				using MYTYPE = typename std::conditional< \
+					std::is_same<const __FlashStringHelper*, First>::value, const char*, First>::type;
+				MYTYPE _first = reinterpret_cast<MYTYPE>(first);
+
+				std::cerr << std::forward<MYTYPE>(_first);
 				println(std::forward<Rest>(rest)...);
 			}
 
