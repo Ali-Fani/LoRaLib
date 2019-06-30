@@ -49,7 +49,7 @@ void SPIClass::begin()
 
 void SPIClass::end()
 {
-  if (SPIClass::spiDeviceFp != -1) {
+  if (SPIClass::spiDeviceFp != -1 && SPIClass::initialized <= 0) {
     close(SPIClass::spiDeviceFp);
     SPIClass::spiDeviceFp = -1;
   }
