@@ -64,20 +64,17 @@
 		struct _binary { std::string _digits; };
 
 		template <typename T>
+		constexpr auto _mypow(T b, unsigned int e ) -> decltype(b + 1)
+		{ return e ? b * _mypow( b, e - 1 ) : 1 ; }
+
+		template <typename T>
 		inline _binary<T> binary(T n) {
 			_binary<T> __binary;
-			int bits = sizeof(n);
-
-			switch (bits) {
-				case 1: bits = 7; break;
-				case 2: bits = 15; break;
-				case 4: bits = 31; break;
-				case 8: bits = 63; break;
-			}
+			constexpr int bits = _mypow(8U, sizeof(n)) - 1;
 
 			for (int i = bits; i >= 0; --i) {
-				if ((n >> i) & 1) __binary._digits.append("1");
-				else __binary._digits.append("0");
+				if ((n >> i) & 1) __binary._digits.append(1, '1');
+				else __binary._digits.append(1, '0');
 			}
 
 			return __binary;
