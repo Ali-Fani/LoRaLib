@@ -174,6 +174,8 @@ int16_t SX127x::transmit(uint8_t* data, size_t len, uint8_t addr) {
         return(ERR_TX_TIMEOUT);
       }
     }
+  } else { // to fix compiler warnings
+    start = micros() - 1000000;
   }
 
   // update data rate
