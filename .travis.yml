@@ -94,7 +94,7 @@ script:
       make;
     fi
 
-# deploy Doxygen docs on gh-pages branch and only when building for Arduino UNO
+# deploy Doxygen docs on master branch and only when building for Arduino UNO
 deploy:
   provider: pages
   skip_cleanup: true
