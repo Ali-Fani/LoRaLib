@@ -563,6 +563,34 @@ class SX127x: public PhysicalLayer {
     int16_t begin(uint8_t chipVersion, uint8_t syncWord, uint8_t currentLimit, uint16_t preambleLength);
 
     /*!
+      \brief %LoRa modem initialization method. Must be called at least once from Arduino sketch to initialize the module.
+
+      \param freq Carrier frequency in MHz. Allowed values range depends on the actual LoRa chip model.
+
+      \param bw %LoRa link bandwidth in kHz. Allowed values in KHz depend on the actual LoRa chip model.
+
+      \param sf %LoRa link spreading factor. Allowed values range depend on the actual LoRa chip model.
+
+      \param cr %LoRa link coding rate denominator. Allowed values range depend on the actual LoRa chip model.
+
+      \param syncWord %LoRa sync word. Can be used to distinguish different networks. Note that value 0x34 is reserved for LoRaWAN networks.
+
+      \param power Transmission output power in dBm. Allowed values range depend on the actual LoRa chip model.
+
+      \param currentLimit Trim value for OCP (over current protection) in mA. Value of 0 can disable OCP (not recommended).
+      The accepted values range depend on the actual LoRa chip model.
+
+      \param preambleLength Length of %LoRa transmission preamble in symbols. The actual preamble length is 4.25 symbols longer than the set number.
+      Allowed values range from 6 to 65535.
+
+      \param gain Gain of receiver LNA (low-noise amplifier). Set to 0 to enable automatic gain control (recommended).
+      Allowed values range is typically between 1 to 6, but can also depend on the actual LoRa chip model.
+
+      \returns \ref status_codes
+    */
+    virtual int16_t begin(float freq = 434.0, float bw = 125.0, uint8_t sf = 9, uint8_t cr = 7, uint8_t syncWord = SX127X_SYNC_WORD, int8_t power = 17, uint8_t currentLimit = 100, uint16_t preambleLength = 8, uint8_t gain = 0) = 0;
+
+    /*!
       \brief Initialization method for FSK modem. Will be called with appropriate parameters when calling FSK initialization method from derived class.
 
       \param chipVersion Value in SPI version register. Used to verify the connection and hardware version.
@@ -753,6 +781,13 @@ class SX127x: public PhysicalLayer {
       \returns Last packet signal-to-noise ratio (SNR).
     */
     float getSNR();
+
+   /*!
+      \brief Gets recorded signal strength indicator of the latest received packet.
+
+      \returns Last packet recorded signal strength indicator (RSSI).
+    */
+    virtual int8_t getRSSI() = 0;
 
     /*!
       \brief Get data rate of the latest transmitted packet.
