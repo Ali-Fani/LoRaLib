@@ -207,6 +207,9 @@ int16_t SX127x::receive(uint8_t* data, size_t len) {
         clearIRQFlags();
         return(ERR_RX_TIMEOUT);
       }
+#ifdef LINUX
+      delayMicroseconds(500);
+#endif
     }
 
   } else if(modem == SX127X_FSK_OOK) {
@@ -226,6 +229,9 @@ int16_t SX127x::receive(uint8_t* data, size_t len) {
         clearIRQFlags();
         return(ERR_RX_TIMEOUT);
       }
+#ifdef LINUX
+      delayMicroseconds(500);
+#endif
     }
   }
 
