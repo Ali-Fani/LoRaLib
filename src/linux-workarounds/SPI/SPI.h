@@ -23,6 +23,7 @@
   #define millis(...) (0)
   #define micros(...) (0)
   #define delay(...) (0)
+  #define delayMicroseconds(...) (0)
   #define INPUT
   #define OUTPUT
   #define LOW
