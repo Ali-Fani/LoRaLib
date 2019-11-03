@@ -782,12 +782,12 @@ class SX127x: public PhysicalLayer {
     */
     float getSNR();
 
-   /*!
-      \brief Gets recorded signal strength indicator of the latest received packet.
+    /*!
+      \brief Gets recorded signal strength indicator of the latest received packet for LoRa modem, or current RSSI level for FSK modem.
 
-      \returns Last packet recorded signal strength indicator (RSSI).
+      \returns Last packet RSSI for LoRa modem, or current RSSI level for FSK modem.
     */
-    virtual int8_t getRSSI() = 0;
+    virtual float getRSSI() = 0;
 
     /*!
       \brief Get data rate of the latest transmitted packet.
