@@ -740,6 +740,15 @@ class SX127x: public PhysicalLayer {
     // configuration methods
 
     /*!
+      \brief Sets %LoRa link spreading factor. Allowed values range from 6 to 12. Only available in %LoRa mode.
+
+      \param sf %LoRa link spreading factor to be set.
+
+      \returns \ref status_codes
+    */
+    virtual int16_t setSpreadingFactor(uint8_t sf) = 0;
+
+    /*!
       \brief Sets %LoRa sync word. Only available in %LoRa mode.
 
       \param syncWord Sync word to be set.
