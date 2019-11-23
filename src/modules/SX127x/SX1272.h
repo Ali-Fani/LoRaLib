@@ -1,8 +1,8 @@
 #ifndef _RADIOLIB_SX1272_H
 #define _RADIOLIB_SX1272_H
 
-#include "TypeDef.h"
-#include "Module.h"
+#include "../../TypeDef.h"
+#include "../../Module.h"
 #include "SX127x.h"
 
 // SX1272 specific register map
@@ -250,14 +250,18 @@ class SX1272: public SX127x {
     */
     int16_t setCRC(bool enableCRC);
 
+#ifndef RADIOLIB_GODMODE
   protected:
+#endif
     int16_t setBandwidthRaw(uint8_t newBandwidth);
     int16_t setSpreadingFactorRaw(uint8_t newSpreadingFactor);
     int16_t setCodingRateRaw(uint8_t newCodingRate);
 
     int16_t configFSK();
 
+#ifndef RADIOLIB_GODMODE
   private:
+#endif
 
 };
 

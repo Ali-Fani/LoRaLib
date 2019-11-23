@@ -1,10 +1,10 @@
 #ifndef _RADIOLIB_SX127X_H
 #define _RADIOLIB_SX127X_H
 
-#include "TypeDef.h"
-#include "Module.h"
+#include "../../TypeDef.h"
+#include "../../Module.h"
 
-#include "../protocols/PhysicalLayer.h"
+#include "../../protocols/PhysicalLayer/PhysicalLayer.h"
 
 // SX127x physical layer properties
 #define SX127X_CRYSTAL_FREQ                           32.0
@@ -911,7 +911,9 @@ class SX127x: public PhysicalLayer {
       void regDump();
     #endif
 
+#ifndef RADIOLIB_GODMODE
   protected:
+#endif
     Module* _mod;
 
     float _freq;
@@ -928,8 +930,9 @@ class SX127x: public PhysicalLayer {
     int16_t getActiveModem();
     int16_t directMode();
 
-
+#ifndef RADIOLIB_GODMODE
   private:
+#endif
     float _dataRate;
     size_t _packetLength;
     bool _packetLengthQueried; // FSK packet length is the first byte in FIFO, length can only be queried once

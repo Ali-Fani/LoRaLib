@@ -1,7 +1,7 @@
 #ifndef _RADIOLIB_PHYSICAL_LAYER_H
 #define _RADIOLIB_PHYSICAL_LAYER_H
 
-#include "TypeDef.h"
+#include "../../TypeDef.h"
 
 /*!
   \class PhysicalLayer
@@ -215,7 +215,9 @@ class PhysicalLayer {
    */
    virtual size_t getPacketLength(bool update = true) = 0;
 
+#ifndef RADIOLIB_GODMODE
   private:
+#endif
     float _crystalFreq;
     uint8_t _divExponent;
     size_t _maxPacketLength;
