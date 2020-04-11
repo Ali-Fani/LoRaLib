@@ -202,6 +202,20 @@
  */
 //#define RADIOLIB_GODMODE
 
+// set the size of static arrays to use
+#define RADIOLIB_STATIC_ARRAY_SIZE   256
+
+/*!
+  \brief A simple assert macro, will return on error.
+*/
+#define RADIOLIB_ASSERT(STATEVAR) { if((STATEVAR) != ERR_NONE) { return(STATEVAR); } }
+
+/*!
+  \brief Macro to check variable is within constraints - this is commonly used to check parameter ranges.
+*/
+#define RADIOLIB_CHECK_RANGE(VAR, MIN, MAX, ERR) { if(!(((VAR) >= (MIN)) && ((VAR) <= (MAX)))) { return(ERR); } }
+
+
 // Shield configuration
 #define RADIOLIB_USE_SPI                      0x00
 #define RADIOLIB_USE_UART                     0x01
