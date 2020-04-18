@@ -1,4 +1,4 @@
-dist: xenial
+dist: bionic
 sudo: true
 
 cache:
@@ -7,7 +7,7 @@ cache:
 
 env:
   global:
-    - ARDUINO_IDE_VERSION="1.8.9"
+    - ARDUINO_IDE_VERSION="1.8.12"
   matrix:
     - BOARD="NONE:LINUX"
     - BOARD="arduino:avr:uno"
