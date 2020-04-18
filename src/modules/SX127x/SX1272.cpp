@@ -7,53 +7,34 @@ SX1272::SX1272(Module* mod) : SX127x(mod) {
 int16_t SX1272::begin(float freq, float bw, uint8_t sf, uint8_t cr, uint8_t syncWord, int8_t power, uint8_t currentLimit, uint16_t preambleLength, uint8_t gain) {
   // execute common part
   int16_t state = SX127x::begin(SX1272_CHIP_VERSION, syncWord, currentLimit, preambleLength);
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   // configure settings not accessible by API
   state = config();
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   // mitigation of receiver spurious response
   // see SX1272/73 Errata, section 2.2 for details
   state = _mod->SPIsetRegValue(0x31, 0b10000000, 7, 7);
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   // configure publicly accessible settings
   state = setFrequency(freq);
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   state = setBandwidth(bw);
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   state = setSpreadingFactor(sf);
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   state = setCodingRate(cr);
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   state = setOutputPower(power);
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   state = setGain(gain);
-  if(state != ERR_NONE) {
-    return(state);
-  }
 
   return(state);
 }
@@ -61,35 +42,31 @@ int16_t SX1272::begin(float freq, float bw, uint8_t sf, uint8_t cr, uint8_t sync
 int16_t SX1272::beginFSK(float freq, float br, float rxBw, float freqDev, int8_t power, uint8_t currentLimit, uint16_t preambleLength, bool enableOOK) {
   // execute common part
   int16_t state = SX127x::beginFSK(SX1272_CHIP_VERSION, br, rxBw, freqDev, currentLimit, preambleLength, enableOOK);
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   // configure settings not accessible by API
   state = configFSK();
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   // configure publicly accessible settings
   state = setFrequency(freq);
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   state = setOutputPower(power);
-  if(state != ERR_NONE) {
-    return(state);
-  }
 
   return(state);
 }
 
+void SX1272::reset() {
+  Module::pinMode(_mod->getRst(), OUTPUT);
+  Module::digitalWrite(_mod->getRst(), HIGH);
+  delay(1);
+  Module::digitalWrite(_mod->getRst(), LOW);
+  delay(5);
+}
+
 int16_t SX1272::setFrequency(float freq) {
-  // check frequency range
-  if((freq < 860.0) || (freq > 1020.0)) {
-    return(ERR_INVALID_FREQUENCY);
-  }
+  RADIOLIB_CHECK_RANGE(freq, 860.0, 1020.0, ERR_INVALID_FREQUENCY);
 
   // set frequency and if successful, save the new setting
   int16_t state = SX127x::setFrequencyRaw(freq);
@@ -326,13 +303,13 @@ int16_t SX1272::setDataShapingOOK(uint8_t sh) {
   // set data shaping
   switch(sh) {
     case 0:
-      state |= _mod->SPIsetRegValue(SX127X_REG_PA_RAMP, SX1272_NO_SHAPING, 4, 3);
+      state |= _mod->SPIsetRegValue(SX127X_REG_OP_MODE, SX1272_NO_SHAPING, 4, 3);
       break;
     case 1:
-      state |= _mod->SPIsetRegValue(SX127X_REG_PA_RAMP, SX1272_OOK_FILTER_BR, 4, 3);
+      state |= _mod->SPIsetRegValue(SX127X_REG_OP_MODE, SX1272_OOK_FILTER_BR, 4, 3);
       break;
     case 2:
-      state |= _mod->SPIsetRegValue(SX127X_REG_PA_RAMP, SX1272_OOK_FILTER_2BR, 4, 3);
+      state |= _mod->SPIsetRegValue(SX127X_REG_OP_MODE, SX1272_OOK_FILTER_2BR, 4, 3);
       break;
     default:
       state = ERR_INVALID_DATA_SHAPING;
@@ -429,12 +406,14 @@ int16_t SX1272::setCodingRateRaw(uint8_t newCodingRate) {
 int16_t SX1272::configFSK() {
   // configure common registers
   int16_t state = SX127x::configFSK();
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   // set fast PLL hop
   state = _mod->SPIsetRegValue(SX1272_REG_PLL_HOP, SX127X_FAST_HOP_ON, 7, 7);
+  RADIOLIB_ASSERT(state);
+
+  // set Gauss filter BT product to 0.5
+  state = _mod->SPIsetRegValue(SX127X_REG_OP_MODE, SX1272_FSK_GAUSSIAN_0_5, 4, 3);
 
   return(state);
 }

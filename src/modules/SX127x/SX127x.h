@@ -7,10 +7,11 @@
 #include "../../protocols/PhysicalLayer/PhysicalLayer.h"
 
 // SX127x physical layer properties
-#define SX127X_CRYSTAL_FREQ                           32.0
-#define SX127X_DIV_EXPONENT                           19
+#define SX127X_FREQUENCY_STEP_SIZE                    61.03515625
 #define SX127X_MAX_PACKET_LENGTH                      255
 #define SX127X_MAX_PACKET_LENGTH_FSK                  64
+#define SX127X_CRYSTAL_FREQ                           32.0
+#define SX127X_DIV_EXPONENT                           19
 
 // SX127x series common LoRa registers
 #define SX127X_REG_FIFO                               0x00
@@ -479,7 +480,7 @@
 #define SX127X_FLAG_TX_READY                          0b00100000  //  5     5     transmission ready (after PA ramp-up)
 #define SX127X_FLAG_PLL_LOCK                          0b00010000  //  4     4     PLL locked
 #define SX127X_FLAG_RSSI                              0b00001000  //  3     3     RSSI value exceeds RSSI threshold
-#define SX127X_FLAG_TIMEOUT                           0b00000100  //  2     2     timeout occured
+#define SX127X_FLAG_TIMEOUT                           0b00000100  //  2     2     timeout occurred
 #define SX127X_FLAG_PREAMBLE_DETECT                   0b00000010  //  1     1     valid preamble was detected
 #define SX127X_FLAG_SYNC_ADDRESS_MATCH                0b00000001  //  0     0     sync address matched
 
@@ -487,7 +488,7 @@
 #define SX127X_FLAG_FIFO_FULL                         0b10000000  //  7     7     FIFO is full
 #define SX127X_FLAG_FIFO_EMPTY                        0b01000000  //  6     6     FIFO is empty
 #define SX127X_FLAG_FIFO_LEVEL                        0b00100000  //  5     5     number of bytes in FIFO exceeds FIFO_THRESHOLD
-#define SX127X_FLAG_FIFO_OVERRUN                      0b00010000  //  4     4     FIFO overrun occured
+#define SX127X_FLAG_FIFO_OVERRUN                      0b00010000  //  4     4     FIFO overrun occurred
 #define SX127X_FLAG_PACKET_SENT                       0b00001000  //  3     3     packet was successfully sent
 #define SX127X_FLAG_PAYLOAD_READY                     0b00000100  //  2     2     packet was successfully received
 #define SX127X_FLAG_CRC_OK                            0b00000010  //  1     1     CRC check passed
@@ -592,6 +593,11 @@ class SX127x: public PhysicalLayer {
     virtual int16_t begin(float freq = 434.0, float bw = 125.0, uint8_t sf = 9, uint8_t cr = 7, uint8_t syncWord = SX127X_SYNC_WORD, int8_t power = 17, uint8_t currentLimit = 100, uint16_t preambleLength = 8, uint8_t gain = 0) = 0;
 
     /*!
+      \brief Reset method. Will reset the chip to the default state using RST pin. Declared pure virtual since SX1272 and SX1278 implementations differ.
+    */
+    virtual void reset() = 0;
+
+    /*!
       \brief Initialization method for FSK modem. Will be called with appropriate parameters when calling FSK initialization method from derived class.
 
       \param chipVersion Value in SPI version register. Used to verify the connection and hardware version.
@@ -685,7 +691,6 @@ class SX127x: public PhysicalLayer {
     */
     int16_t packetMode();
 
-
     // interrupt methods
 
     /*!
@@ -696,11 +701,21 @@ class SX127x: public PhysicalLayer {
     void setDio0Action(void (*func)(void));
 
     /*!
+      \brief Clears interrupt service routine to call when DIO0 activates.
+    */
+    void clearDio0Action();
+
+    /*!
       \brief Set interrupt service routine function to call when DIO1 activates.
 
       \param func Pointer to interrupt service routine.
     */
     void setDio1Action(void (*func)(void));
+
+    /*!
+      \brief Clears interrupt service routine to call when DIO1 activates.
+    */
+    void clearDio1Action();
 
     /*!
       \brief Interrupt-driven binary transmit method. Will start transmitting arbitrary binary data up to 255 bytes long using %LoRa or up to 63 bytes using FSK modem.
@@ -908,7 +923,7 @@ class SX127x: public PhysicalLayer {
     /*!
       \brief Sets RSSI measurement configuration in FSK mode.
 
-      \param smoothingSamples Number of samples taken to avergae the RSSI result.
+      \param smoothingSamples Number of samples taken to average the RSSI result.
       numSamples = 2 ^ (1 + smoothingSamples), allowed values are in range 0 (2 samples) - 7 (256 samples)
 
       \param offset Signed RSSI offset that will be automatically compensated. 1 dB per LSB, defaults to 0, allowed values are in range -16 dB to +15 dB.

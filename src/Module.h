@@ -35,24 +35,23 @@ class Module {
       \param int1 Arduino pin that will be used as interrupt/GPIO 1. Connect to SX127x/RFM9x pin DIO1.
       Does not need to be connected to Arduino interrupt pin, unless Arduino sketch is using interrupt-driven transmit/receive methods.
 
+      \param rst Arduino pin that will be used connected to the reset pin of the module. Defaults to RADIOLIB_NC.
+
       \param spi SPIClass instance that will be used for SPI bus control. This can be hardware SPI or some software SPI driver.
     */
-    Module(int cs = LORALIB_DEFAULT_SPI_CS, int int0 = 2, int int1 = 3, SPIClass& spi = SPI);
+    Module(RADIOLIB_PIN_TYPE cs = LORALIB_DEFAULT_SPI_CS, RADIOLIB_PIN_TYPE int0 = 2, RADIOLIB_PIN_TYPE int1 = 3, RADIOLIB_PIN_TYPE rst = RADIOLIB_NC, SPIClass& spi = SPI);
 
     /*!
       \brief Initialization method. Called internally when connecting to the %LoRa chip and should not be called explicitly from Arduino code.
 
       \param interface %Module interface that should be used. Required for RadioLib compatibility, will always be set to USE_SPI.
-
-      \param gpio Determines which interrupt/GPIO should be used. Required for RadioLib compatibility, will always be set to INT_BOTH.
     */
-    void init(uint8_t interface, uint8_t gpio);
+    void init(uint8_t interface);
 
     /*!
       \brief Termination method. Called internally when required %LoRa chip is not found and should not be called explicitly from Arduino code.
     */
     void term();
-
 
 
     /*!
@@ -144,27 +143,63 @@ class Module {
     */
     void SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* dataIn, uint8_t numBytes);
 
+   /*!
+      \brief Access method to get the pin number of SPI chip select.
+
+      \returns Pin number of SPI chip select configured in the constructor.
+    */
+    RADIOLIB_PIN_TYPE getCs() const { return(_cs); }
 
     /*!
-      \brief Access method to get the pin number of interrupt/GPIO 0.
+      \brief Access method to get the pin number of interrupt/GPIO.
 
-      \returns Pin number of interrupt/GPIO 0 configured in the constructor.
+      \returns Pin number of interrupt/GPIO configured in the constructor.
     */
-    int getInt0() const { return(_int0); }
+    RADIOLIB_PIN_TYPE getIrq() const { return(_int0); }
+    
 
     /*!
-      \brief Access method to get the pin number of interrupt/GPIO 1.
+      \brief Access method to get the pin number of second interrupt/GPIO.
 
-      \returns Pin number of interrupt/GPIO 1 configured in the constructor.
+      \returns Pin number of interrupt/GPIO configured in the constructor.
     */
-    int getInt1() const { return(_int1); }
+    RADIOLIB_PIN_TYPE getGpio() const { return(_int1); }
+
+    /*!
+      \brief Access method to get the pin number of hardware reset pin.
+
+      \returns Pin number of hardware reset pin configured in the constructor.
+    */
+    RADIOLIB_PIN_TYPE getRst() const { return(_rst); }
+
+    /*!
+      \brief Arduino core pinMode override that checks RADIOLIB_NC as alias for unused pin.
+      \param pin Pin to change the mode of.
+      \param mode Which mode to set.
+    */
+    static void pinMode(RADIOLIB_PIN_TYPE pin, RADIOLIB_PIN_MODE mode);
+
+    /*!
+      \brief Arduino core digitalWrite override that checks RADIOLIB_NC as alias for unused pin.
+      \param pin Pin to write to.
+      \param value Whether to set the pin high or low.
+    */
+    static void digitalWrite(RADIOLIB_PIN_TYPE pin, RADIOLIB_PIN_STATUS value);
+
+    /*!
+      \brief Arduino core digitalWrite override that checks RADIOLIB_NC as alias for unused pin.
+      \param pin Pin to read from.
+      \returns Pin value.
+    */
+    static RADIOLIB_PIN_STATUS digitalRead(RADIOLIB_PIN_TYPE pin);
 
 #ifndef RADIOLIB_GODMODE
   private:
 #endif
-    int _cs;
-    int _int0;
-    int _int1;
+    RADIOLIB_PIN_TYPE _cs;
+    RADIOLIB_PIN_TYPE _int0;
+    RADIOLIB_PIN_TYPE _int1;
+    RADIOLIB_PIN_TYPE _rst;
 
     SPIClass* _spi;
 };

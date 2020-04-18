@@ -9,6 +9,134 @@
 	#endif
 #endif
 
+/*
+ * Platform-specific configuration.
+ *
+ * RADIOLIB_PIN_TYPE - which type should be used for pin numbers in functions like digitalRead().
+ * RADIOLIB_PIN_MODE - which type should be used for pin modes in functions like pinMode().
+ * RADIOLIB_PIN_STATUS - which type should be used for pin values in functions like digitalWrite().
+ * RADIOLIB_NC - alias for unused pin, usually the largest possible value of RADIOLIB_PIN_TYPE.
+ * RADIOLIB_SOFTWARE_SERIAL_UNSUPPORTED - defined if the specific platform does not support SoftwareSerial.
+ * RADIOLIB_HARDWARE_SERIAL_PORT - which hardware serial port should be used on platform that do not have SoftwareSerial support.
+ *
+ * In addition, some platforms may require RadioLib to disable specific drivers (such as ESP8266).
+ */
+#if defined(__AVR__) && !(defined(ARDUINO_AVR_UNO_WIFI_REV2) || defined(ARDUINO_AVR_NANO_EVERY))
+   // Arduino AVR boards (except for megaAVR) - Uno, Mega etc.
+   #define RADIOLIB_PIN_TYPE                          uint8_t
+   #define RADIOLIB_PIN_MODE                          uint8_t
+   #define RADIOLIB_PIN_STATUS                        uint8_t
+   #define RADIOLIB_NC                                (0xFF)
+
+#elif defined(ESP8266)
+   // ESP8266 boards
+   #define RADIOLIB_PIN_TYPE                          uint8_t
+   #define RADIOLIB_PIN_MODE                          uint8_t
+   #define RADIOLIB_PIN_STATUS                        uint8_t
+   #define RADIOLIB_NC                                (0xFF)
+
+   // RadioLib has ESPS8266 driver, this must be disabled to use ESP8266 as platform
+   #define _RADIOLIB_ESP8266_H
+
+#elif defined(ESP32)
+  // ESP32 boards
+  #define RADIOLIB_PIN_TYPE                           uint8_t
+  #define RADIOLIB_PIN_MODE                           uint8_t
+  #define RADIOLIB_PIN_STATUS                         uint8_t
+  #define RADIOLIB_NC                                 (0xFF)
+  #define RADIOLIB_SOFTWARE_SERIAL_UNSUPPORTED
+  #define RADIOLIB_HARDWARE_SERIAL_PORT               Serial1
+
+#elif defined(ARDUINO_ARCH_STM32)
+  // STM32duino boards
+  #define RADIOLIB_PIN_TYPE                           uint32_t
+  #define RADIOLIB_PIN_MODE                           uint32_t
+  #define RADIOLIB_PIN_STATUS                         uint32_t
+  #define RADIOLIB_NC                                 (0xFFFFFFFF)
+  #define RADIOLIB_SOFTWARE_SERIAL_UNSUPPORTED
+  #define RADIOLIB_HARDWARE_SERIAL_PORT               Serial1
+
+#elif defined(SAMD_SERIES)
+  // Arduino SAMD boards - Zero, MKR, etc.
+  #define RADIOLIB_PIN_TYPE                           uint32_t
+  #define RADIOLIB_PIN_MODE                           uint32_t
+  #define RADIOLIB_PIN_STATUS                         uint32_t
+  #define RADIOLIB_NC                                 (0xFFFFFFFF)
+  #define RADIOLIB_SOFTWARE_SERIAL_UNSUPPORTED
+  #define RADIOLIB_HARDWARE_SERIAL_PORT               Serial1
+
+#elif defined(__SAM3X8E__)
+  // Arduino Due
+  #define RADIOLIB_PIN_TYPE                           uint32_t
+  #define RADIOLIB_PIN_MODE                           uint32_t
+  #define RADIOLIB_PIN_STATUS                         uint32_t
+  #define RADIOLIB_NC                                 (0xFFFFFFFF)
+  #define RADIOLIB_SOFTWARE_SERIAL_UNSUPPORTED
+  #define RADIOLIB_HARDWARE_SERIAL_PORT               Serial1
+
+#elif (defined(NRF52832_XXAA) || defined(NRF52840_XXAA)) && !defined(ARDUINO_ARDUINO_NANO33BLE)
+  // Adafruit nRF52 boards
+  #define RADIOLIB_PIN_TYPE                           uint32_t
+  #define RADIOLIB_PIN_MODE                           uint32_t
+  #define RADIOLIB_PIN_STATUS                         uint32_t
+  #define RADIOLIB_NC                                 (0xFFFFFFFF)
+
+#elif defined(ARDUINO_ARC32_TOOLS)
+  // Intel Curie
+  #define RADIOLIB_PIN_TYPE                           uint8_t
+  #define RADIOLIB_PIN_MODE                           uint8_t
+  #define RADIOLIB_PIN_STATUS                         uint8_t
+  #define RADIOLIB_NC                                 (0xFF)
+
+#elif defined(ARDUINO_AVR_UNO_WIFI_REV2) || defined(ARDUINO_AVR_NANO_EVERY)
+  // Arduino megaAVR boards - Uno Wifi Rev.2, Nano Every
+  #define RADIOLIB_PIN_TYPE                           uint8_t
+  #define RADIOLIB_PIN_MODE                           PinMode
+  #define RADIOLIB_PIN_STATUS                         PinStatus
+  #define RADIOLIB_NC                                 (0xFF)
+
+#elif defined(AM_PART_APOLLO3)
+  // Sparkfun Artemis boards
+  #define RADIOLIB_PIN_TYPE                           uint8_t
+  #define RADIOLIB_PIN_MODE                           uint8_t
+  #define RADIOLIB_PIN_STATUS                         uint8_t
+  #define RADIOLIB_NC                                 (0xFF)
+  #define RADIOLIB_SOFTWARE_SERIAL_UNSUPPORTED
+  #define RADIOLIB_HARDWARE_SERIAL_PORT               Serial1
+
+#elif defined(ARDUINO_ARDUINO_NANO33BLE)
+  // Arduino Nano 33 BLE
+  #define RADIOLIB_PIN_TYPE                           pin_size_t
+  #define RADIOLIB_PIN_MODE                           PinMode
+  #define RADIOLIB_PIN_STATUS                         PinStatus
+  #define RADIOLIB_NC                                 (0xFF)
+  #define RADIOLIB_SOFTWARE_SERIAL_UNSUPPORTED
+  #define RADIOLIB_HARDWARE_SERIAL_PORT               Serial1
+
+  // Nano 33 BLE uses mbed libraries, which already contain ESP8266 driver
+  #define _RADIOLIB_ESP8266_H
+
+#elif defined (LINUX)
+  // Linux pseudo-definitions, for Armbian/Raspbian/etc.
+  #define RADIOLIB_PIN_TYPE                           uint32_t
+  #define RADIOLIB_PIN_MODE                           uint32_t
+  #define RADIOLIB_PIN_STATUS                         uint32_t
+  #define RADIOLIB_NC                                 (0xFFFFFFFF)
+  #define RADIOLIB_SOFTWARE_SERIAL_UNSUPPORTED
+  #define RADIOLIB_HARDWARE_SERIAL_PORT               Serial1
+
+
+#else
+  // other platforms not covered by the above list - this may or may not work
+  #define RADIOLIB_UNKNOWN_PLATFORM
+  #define RADIOLIB_PIN_TYPE                           uint8_t
+  #define RADIOLIB_PIN_MODE                           uint8_t
+  #define RADIOLIB_PIN_STATUS                         uint8_t
+  #define RADIOLIB_NC                                 (0xFF)
+
+#endif
+
+
 #ifdef LINUX
 	#include <inttypes.h>
 	#include <stdint.h>
@@ -48,6 +176,7 @@
 		#define PGM_VOID_P const void *
 		#define PSTR(s) (__extension__({static const char __c[] PROGMEM = (s); &__c[0];}))
 		#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
+		#define yield() (delay(1))
 
 		typedef std::ios_base& (*mock_manipulator)(std::ios_base&);
 

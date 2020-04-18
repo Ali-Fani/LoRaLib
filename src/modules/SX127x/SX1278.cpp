@@ -7,46 +7,29 @@ SX1278::SX1278(Module* mod) : SX127x(mod) {
 int16_t SX1278::begin(float freq, float bw, uint8_t sf, uint8_t cr, uint8_t syncWord, int8_t power, uint8_t currentLimit, uint16_t preambleLength, uint8_t gain) {
   // execute common part
   int16_t state = SX127x::begin(SX1278_CHIP_VERSION, syncWord, currentLimit, preambleLength);
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   // configure settings not accessible by API
   state = config();
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   // configure publicly accessible settings
   state = setFrequency(freq);
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   state = setBandwidth(bw);
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   state = setSpreadingFactor(sf);
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   state = setCodingRate(cr);
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   state = setOutputPower(power);
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   state = setGain(gain);
-  if(state != ERR_NONE) {
-    return(state);
-  }
 
   return(state);
 }
@@ -54,35 +37,31 @@ int16_t SX1278::begin(float freq, float bw, uint8_t sf, uint8_t cr, uint8_t sync
 int16_t SX1278::beginFSK(float freq, float br, float freqDev, float rxBw, int8_t power, uint8_t currentLimit, uint16_t preambleLength, bool enableOOK) {
   // execute common part
   int16_t state = SX127x::beginFSK(SX1278_CHIP_VERSION, br, freqDev, rxBw, currentLimit, preambleLength, enableOOK);
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   // configure settings not accessible by API
   state = configFSK();
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   // configure publicly accessible settings
   state = setFrequency(freq);
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   state = setOutputPower(power);
-  if(state != ERR_NONE) {
-    return(state);
-  }
 
   return(state);
 }
 
+void SX1278::reset() {
+  Module::pinMode(_mod->getRst(), OUTPUT);
+  Module::digitalWrite(_mod->getRst(), LOW);
+  delay(1);
+  Module::digitalWrite(_mod->getRst(), HIGH);
+  delay(5);
+}
+
 int16_t SX1278::setFrequency(float freq) {
-  // check frequency range
-  if((freq < 137.0) || (freq > 525.0)) {
-    return(ERR_INVALID_FREQUENCY);
-  }
+  RADIOLIB_CHECK_RANGE(freq, 137.0, 525.0, ERR_INVALID_FREQUENCY);
 
   // SX1276/77/78 Errata fixes
   if(getActiveModem() == SX127X_LORA) {
@@ -505,12 +484,14 @@ int16_t SX1278::setCodingRateRaw(uint8_t newCodingRate) {
 int16_t SX1278::configFSK() {
   // configure common registers
   int16_t state = SX127x::configFSK();
-  if(state != ERR_NONE) {
-    return(state);
-  }
+  RADIOLIB_ASSERT(state);
 
   // set fast PLL hop
   state = _mod->SPIsetRegValue(SX1278_REG_PLL_HOP, SX127X_FAST_HOP_ON, 7, 7);
+  RADIOLIB_ASSERT(state);
+
+  // set Gauss filter BT product to 0.5
+  state = _mod->SPIsetRegValue(SX127X_REG_PA_RAMP, SX1278_FSK_GAUSSIAN_0_5, 6, 5);
 
   return(state);
 }

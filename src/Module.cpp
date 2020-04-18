@@ -1,40 +1,25 @@
 #include "Module.h"
 
-Module::Module(int cs, int int0, int int1, SPIClass& spi) {
+Module::Module(RADIOLIB_PIN_TYPE cs, RADIOLIB_PIN_TYPE int0, RADIOLIB_PIN_TYPE int1, RADIOLIB_PIN_TYPE rst, SPIClass& spi) {
   // save pins numbers to private global variables
   _cs = cs;
   _int0 = int0;
   _int1 = int1;
+  _rst = rst;
   _spi = &spi;
 }
 
-void Module::init(uint8_t interface, uint8_t gpio) {
+void Module::init(uint8_t interface) {
   // select interface
   switch(interface) {
     case RADIOLIB_USE_SPI:
-      pinMode(_cs, OUTPUT);
-      digitalWrite(_cs, HIGH);
+      Module::pinMode(_cs, OUTPUT);
+      Module::digitalWrite(_cs, HIGH);
       _spi->begin();
       break;
     case RADIOLIB_USE_UART:
       break;
     case RADIOLIB_USE_I2C:
-      break;
-  }
-
-  // select GPIO
-  switch(gpio) {
-    case RADIOLIB_INT_NONE:
-      break;
-    case RADIOLIB_INT_0:
-      pinMode(_int0, INPUT);
-      break;
-    case RADIOLIB_INT_1:
-      pinMode(_int1, INPUT);
-      break;
-    case RADIOLIB_INT_BOTH:
-      pinMode(_int0, INPUT);
-      pinMode(_int1, INPUT);
       break;
   }
 }
@@ -134,7 +119,7 @@ void Module::SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* da
   _spi->beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
 
   // pull CS low
-  digitalWrite(_cs, LOW);
+  Module::digitalWrite(_cs, LOW);
 
   // send SPI register address with access command
   _spi->transfer(reg | cmd);
@@ -156,8 +141,27 @@ void Module::SPItransfer(uint8_t cmd, uint8_t reg, uint8_t* dataOut, uint8_t* da
   }
 
   // release CS
-  digitalWrite(_cs, HIGH);
+  Module::digitalWrite(_cs, HIGH);
 
   // end SPI transaction
   _spi->endTransaction();
+}
+
+void Module::pinMode(RADIOLIB_PIN_TYPE pin, RADIOLIB_PIN_MODE mode) {
+  if(pin != RADIOLIB_NC) {
+    ::pinMode(pin, mode);
+  }
+}
+
+void Module::digitalWrite(RADIOLIB_PIN_TYPE pin, RADIOLIB_PIN_STATUS value) {
+  if(pin != RADIOLIB_NC) {
+    ::digitalWrite(pin, value);
+  }
+}
+
+RADIOLIB_PIN_STATUS Module::digitalRead(RADIOLIB_PIN_TYPE pin) {
+  if(pin != RADIOLIB_NC) {
+    return(::digitalRead(pin));
+  }
+  return(LOW);
 }
