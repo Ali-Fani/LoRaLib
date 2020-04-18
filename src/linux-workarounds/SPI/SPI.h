@@ -17,17 +17,18 @@
   #define wiringPiSetup(...) {}
   #define wiringPiSPISetupMode(...) (-1)
   #define wiringPiSPIDataRW(...) (-1)
-  #define digitalWrite(...) (0)
-  #define digitalRead(...) (0)
-  #define pinMode(...) {}
   #define millis(...) (0)
   #define micros(...) (0)
   #define delay(...) (0)
   #define delayMicroseconds(...) (0)
-  #define INPUT
-  #define OUTPUT
-  #define LOW
-  #define HIGH
+  #define INPUT 1
+  #define OUTPUT 0
+  #define LOW 0
+  #define HIGH 1
+
+  void digitalWrite(uint32_t pin, uint32_t value);
+  uint32_t digitalRead(uint32_t pin);
+  void pinMode(uint32_t pin, uint32_t mode);
 #endif
 
 
